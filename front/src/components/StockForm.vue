@@ -8,7 +8,7 @@
           <b-input-group prepend="이름" class="mt-3">
             <b-form-input v-model="name"></b-form-input>
             <b-input-group-append>
-              <b-button variant="info">보기</b-button>
+              <b-button variant="info" @click="showData">보기</b-button>
             </b-input-group-append>
           </b-input-group>
         </b-col>
@@ -76,13 +76,16 @@ export default {
           { text: '배당', value: 'dividend' },
           { text: '이자', value: 'interest' }
         ],
-        name: '',
+        name: this.$route.query.name,
         ticker: '',
         price: 0,
         amount: 0,
       }
     },
-    methods: {
+    methods: {      
+      showData(){
+        window.location = window.location.origin+"/#?name="+this.name;
+      },
       showModal() {
         this.$refs['sendCheck'].show()
       },
