@@ -84,7 +84,8 @@ export default {
     },
     methods: {      
       showData(){
-        window.location = window.location.origin+"/#?name="+this.name;
+        // window.location = window.location.origin+"/#?name="+this.name;
+        window.location = '/?name='+this.name;
       },
       showModal() {
         this.$refs['sendCheck'].show()

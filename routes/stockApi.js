@@ -8,7 +8,9 @@ const dbContext = require("../data/databaseContext");
 router.get('/', async function (req, res, next) {
     const container = getContainer();
 
-    var name = 'jun';
+    console.log(req.query)
+
+    var name = req.query.name;
 
     myStocks = await getMyStocks(container, name);
     myAccount = await getMyAccount(container, name);
@@ -41,7 +43,7 @@ function getContainer(){
 async function getMyStocks(container, name) {
     // query to return all items
     const querySpec = {
-        query: "SELECT * from c where (c.category = 'buy' or c.category = 'sell') and c.user = '"+name+"'"
+        query: "SELECT * from c where (c.category = 'buy' or c.category = 'sell') and c.name = '"+name+"'"
     };
 
     try {
@@ -57,7 +59,7 @@ async function getMyStocks(container, name) {
 async function getMyAccount(container, name) {
     // query to return all items
     const querySpec = {
-        query: "SELECT * from c where (c.category = 'deposit' or c.category = 'withdraw' or c.category = 'dividend' or c.category = 'interest') and c.user = '"+name+"'"
+        query: "SELECT * from c where (c.category = 'deposit' or c.category = 'withdraw' or c.category = 'dividend' or c.category = 'interest') and c.name = '"+name+"'"
     };
 
     try {
@@ -73,7 +75,7 @@ async function getMyAccount(container, name) {
 async function getMyInfo(container, name) {
     // query to return all items
     const querySpec = {
-        query: "SELECT * from c where (c.category = 'fees' or c.category = 'stockData') and c.user = '"+name+"'"
+        query: "SELECT * from c where (c.category = 'fees' or c.category = 'stockData') and c.name = '"+name+"'"
     };
 
     try {

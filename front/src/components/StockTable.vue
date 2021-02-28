@@ -92,11 +92,10 @@
     import axios from 'axios'
 
     export default {
-        name: 'Stock',
         created() {
             this
                 .$http
-                .get('/api')
+                .get('/api?name='+this.name)
                 .then((response) => {
                     response.data[0].forEach(item => {
                         var existingStock = this.stocks.filter(function(element) {
@@ -133,12 +132,11 @@
                             this.myAccount = parseInt(this.myAccount) - parseInt(item.price);
                         } else { }
                     });
-
-                    console.log(this.stocks);
                 })
         },
         data() {
             return {
+                name: this.$route.query.name,
                 myAccount : 0,
                 stocks : [],
                 fields: [
