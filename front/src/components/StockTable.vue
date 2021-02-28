@@ -30,7 +30,6 @@
                     <b-form-group
                         v-model="sortDirection"
                         label="Filter On"
-                        description="Leave all unchecked to filter on all data"
                         label-cols-sm="3"
                         label-align-sm="right"
                         label-size="sm"
@@ -61,19 +60,37 @@
                 small="small">
 
                 <template #cell(amountprice)="data">
-                    {{ data.item.amount * data.item.price }} 
+                    {{ data.item.amount * data.item.price }}
                 </template>
                 
                 <template #cell(weightTarget)="data">
                     {{ data.item.weightTarget }} 
                 </template>
 
+                <template #cell(nowtPrice)="data">
+                    {{ data.item.nowPrice }} 
+                </template>
+
+                <template #cell(nowAmountPrice)="data">
+                    {{ data.item.nowPrice * data.item.amount }} 
+                </template>
+                
+                <template #cell(income)="data">
+                    {{ (data.item.nowPrice*data.item.amount) - (data.item.amount*data.item.price) }} 
+                </template>
+                
+                <template #cell(percentIncome)="data">
+                    {{ (1-(data.item.amount*data.item.price)/(data.item.nowPrice*data.item.amount))*100 }} 
+                </template>
+                
             </b-table>
         </b-container>
     </div>
 </template>
 
 <script>
+    import axios from 'axios'
+
     export default {
         name: 'Stock',
         created() {
@@ -81,8 +98,6 @@
                 .$http
                 .get('/api')
                 .then((response) => {
-                    // this.stocks = response.data[0]
-                    // console.log(response.data[0]);
                     response.data[0].forEach(item => {
                         var existingStock = this.stocks.filter(function(element) {
                             return element.ticker === item.ticker;
@@ -101,10 +116,12 @@
                             } else if(item.category === "sell") {
                                 this.stocks[index].amount = beforeAmount - nowAmount;
                                 this.stocks[index].price = ( (beforePrice*beforeAmount) - (nowPrice*nowAmount) ) / this.stocks[index].amount;
-                            } else {
-                                
-                            }
+                            } else { }
                         } else {
+                            axios.get('https://cloud.iexapis.com/stable/stock/'+item.ticker+'/quote?token=pk_6ee50fde81c24341bdca5f071708c226')
+                                .then(response => {
+                                    item.nowPrice = response.data.latestPrice
+                                })
                             this.stocks.push(item)
                         }
                     });
@@ -114,10 +131,10 @@
                             this.myAccount = parseInt(this.myAccount) + parseInt(item.price);
                         } else if(item.category === "withdraw") {
                             this.myAccount = parseInt(this.myAccount) - parseInt(item.price);
-                        } else {
-
-                        }
+                        } else { }
                     });
+
+                    console.log(this.stocks);
                 })
         },
         data() {

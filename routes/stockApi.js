@@ -8,12 +8,13 @@ const dbContext = require("../data/databaseContext");
 router.get('/', async function (req, res, next) {
     const container = getContainer();
 
-    var name = req.query.name;
+    var name = 'jun';
 
     myStocks = await getMyStocks(container, name);
     myAccount = await getMyAccount(container, name);
+    myInfo = await getMyInfo(container, name);
 
-    data = [myStocks, myAccount];
+    data = [myStocks, myAccount, myInfo];
 
     res.send(data);
 });
@@ -40,7 +41,7 @@ function getContainer(){
 async function getMyStocks(container, name) {
     // query to return all items
     const querySpec = {
-        query: "SELECT * from c where (c.category = 'buy' or c.category = 'sell') and c.name = '"+name+"'"
+        query: "SELECT * from c where (c.category = 'buy' or c.category = 'sell') and c.user = '"+name+"'"
     };
 
     try {
@@ -53,10 +54,26 @@ async function getMyStocks(container, name) {
         console.log(err);
     }
 }
-async function getMyAccount(container) {
+async function getMyAccount(container, name) {
     // query to return all items
     const querySpec = {
-        query: "SELECT * from c where (c.category = 'deposit' or c.category = 'withdraw' or c.category = 'dividend' or c.category = 'interest') and c.name = '"+name+"'"
+        query: "SELECT * from c where (c.category = 'deposit' or c.category = 'withdraw' or c.category = 'dividend' or c.category = 'interest') and c.user = '"+name+"'"
+    };
+
+    try {
+        const {resources: items} = await container
+            .items
+            .query(querySpec)
+            .fetchAll();
+        return items;
+    } catch (err) {
+        console.log(err);
+    }
+}
+async function getMyInfo(container, name) {
+    // query to return all items
+    const querySpec = {
+        query: "SELECT * from c where (c.category = 'fees' or c.category = 'stockData') and c.user = '"+name+"'"
     };
 
     try {
