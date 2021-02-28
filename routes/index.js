@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var path = require('path');
 
 const CosmosClient = require("@azure/cosmos").CosmosClient;
 const config = require("../config");
@@ -24,7 +25,7 @@ router.get('/', function(req, res, next) {
 
   select(container);
 
-  res.render('index', { title: 'Express' });
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 async function select(container){
