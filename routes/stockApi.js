@@ -5,19 +5,13 @@ const CosmosClient = require("@azure/cosmos").CosmosClient;
 const config = require("../config");
 const dbContext = require("../data/databaseContext");
 
-const newItem = {
-  id: "2",
-  ticker: "TSLA",
-  name: "Cosmos DB",
-  description: "Complete Cosmos DB Node.js Quickstart ⚡",
-  isComplete: false
-};
-
 router.get('/', async function (req, res, next) {
     const container = getContainer();
-  
-    myStocks = await getMyStocks(container);
-    myAccount = await getMyAccount(container);
+
+    var name = req.query.name;
+
+    myStocks = await getMyStocks(container, name);
+    myAccount = await getMyAccount(container, name);
 
     data = [myStocks, myAccount];
 
@@ -43,10 +37,10 @@ function getContainer(){
 }
 
 
-async function getMyStocks(container) {
+async function getMyStocks(container, name) {
     // query to return all items
     const querySpec = {
-        query: "SELECT * from c where (c.category = 'buy' or c.category = 'sell') and c.user = 'jun'"
+        query: "SELECT * from c where (c.category = 'buy' or c.category = 'sell') and c.name = '"+name+"'"
     };
 
     try {
@@ -62,7 +56,7 @@ async function getMyStocks(container) {
 async function getMyAccount(container) {
     // query to return all items
     const querySpec = {
-        query: "SELECT * from c where (c.category = 'deposit' or c.category = 'withdraw' or c.category = 'dividend' or c.category = 'interest') and c.user = 'jun'"
+        query: "SELECT * from c where (c.category = 'deposit' or c.category = 'withdraw' or c.category = 'dividend' or c.category = 'interest') and c.name = '"+name+"'"
     };
 
     try {
