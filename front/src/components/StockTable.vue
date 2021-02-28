@@ -72,34 +72,8 @@
                 .$http
                 .get('/api?name='+this.name)
                 .then((response) => {
-                    response.data[0].forEach(item => {
-                        var existingStock = this.stocks.filter(function(element) {
-                            return element.ticker === item.ticker;
-                        })
-                        if(existingStock != "") {
-                            var index = this.stocks.findIndex(function(tem, i) {
-                                return tem.ticker === item.ticker
-                            });
-                            var beforePrice = parseInt(this.stocks[index].price);
-                            var beforeAmount = parseInt(this.stocks[index].amount);
-                            var nowPrice = parseInt(item.price);
-                            var nowAmount = parseInt(item.amount);
-                            if(item.category === "buy") {
-                                this.stocks[index].amount = beforeAmount + nowAmount;
-                                this.stocks[index].price = ( (beforePrice*beforeAmount) + (nowPrice*nowAmount) ) / this.stocks[index].amount;
-                            } else if(item.category === "sell") {
-                                this.stocks[index].amount = beforeAmount - nowAmount;
-                                this.stocks[index].price = ( (beforePrice*beforeAmount) - (nowPrice*nowAmount) ) / this.stocks[index].amount;
-                            } else { }
-                    });
-
-                    response.data[1].forEach(item => {
-                        if(item.category === "deposit" || item.category === "interest" || item.category === "dividend") {
-                            this.myAccount = parseInt(this.myAccount) + parseInt(item.price);
-                        } else if(item.category === "withdraw") {
-                            this.myAccount = parseInt(this.myAccount) - parseInt(item.price);
-                        } else { }
-                    });
+                    this.myAccount = response.data[0];
+                    this.stocks = response.data[1];
                 })
         },
         data() {
