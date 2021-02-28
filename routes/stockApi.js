@@ -13,7 +13,7 @@ const newItem = {
   isComplete: false
 };
 
-router.get('/', function (req, res, next) {
+router.get('/', async function (req, res, next) {
     const { endpoint, key, databaseId, containerId } = config;
 
     const client = new CosmosClient({ endpoint, key });
@@ -21,7 +21,7 @@ router.get('/', function (req, res, next) {
     const database = client.database(databaseId);
     const container = database.container(containerId); 
   
-    stockApi = select(container);
+    stockApi = await select(container);
   
     console.log(stockApi);
 
