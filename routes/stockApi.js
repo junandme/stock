@@ -24,11 +24,12 @@ router.get('/', async function (req, res, next) {
     res.send(data);
 });
 
-router.get('/order', function(req, res, next){
+router.put('/order', function(req, res, next){
     const container = getContainer();
 
-    console.log(req.query.name);
+    console.log(req.body);
 
+    insert(container, req.body);
 }) 
 
 function getContainer(){
