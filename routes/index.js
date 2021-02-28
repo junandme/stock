@@ -13,6 +13,20 @@ const newItem = {
   isComplete: false
 };
 
+/* GET home page. */
+router.get('/', function(req, res, next) {
+  const { endpoint, key, databaseId, containerId } = config;
+
+  const client = new CosmosClient({ endpoint, key });
+
+  const database = client.database(databaseId);
+  const container = database.container(containerId); 
+
+  select(container);
+
+  res.render('index', { title: 'Express' });
+});
+
 async function select(container){
   // query to return all items
   const querySpec = {
@@ -29,24 +43,17 @@ async function select(container){
     });
   } catch (err) {
     console.log(err);
-  }
-
-  
+  }  
 }
 
+async function update(createdItem) {
+  const { id, category } = createdItem;
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  const { endpoint, key, databaseId, containerId } = config;
+  createdItem.isComplete = true;
 
-  const client = new CosmosClient({ endpoint, key });
-
-  const database = client.database(databaseId);
-  const container = database.container(containerId); 
-
-  select(container);
-
-  res.render('index', { title: 'Express' });
-});
+  const { resource: updatedItem } = await container
+    .item(id, category)
+    .replace(createdItem);
+}
 
 module.exports = router;
