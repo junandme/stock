@@ -8,8 +8,6 @@ const dbContext = require("../data/databaseContext");
 router.get('/', async function (req, res, next) {
     const container = getContainer();
 
-    console.log(req.query)
-
     var name = req.query.name;
 
     myStocks = await getMyStocks(container, name);
@@ -43,7 +41,7 @@ function getContainer(){
 async function getMyStocks(container, name) {
     // query to return all items
     const querySpec = {
-        query: "SELECT * from c where (c.category = 'buy' or c.category = 'sell') and c.name = '"+name+"'"
+        query: "SELECT * from c where (c.category = 'buy' or c.category = 'sell') and c.name = '"+name+"' order by c._ts"
     };
 
     try {
