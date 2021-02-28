@@ -16,11 +16,12 @@ const newItem = {
 router.get('/', async function (req, res, next) {
     const container = getContainer();
   
-    stockApi = await select(container);
-  
-    console.log(stockApi);
+    myStocks = await getMyStocks(container);
+    myAccount = await getMyAccount(container);
 
-    res.send(stockApi);
+    data = [myStocks, myAccount];
+
+    res.send(data);
 });
 
 router.get('/order', function(req, res, next){
@@ -41,10 +42,10 @@ function getContainer(){
 }
 
 
-async function select(container) {
+async function getMyStocks(container) {
     // query to return all items
     const querySpec = {
-        query: "SELECT * from c"
+        query: "SELECT * from c where (c.category = 'buy' or c.category = 'sell') and c.user = 'jun'"
     };
 
     try {
@@ -57,6 +58,23 @@ async function select(container) {
         console.log(err);
     }
 }
+async function getMyAccount(container) {
+    // query to return all items
+    const querySpec = {
+        query: "SELECT * from c where (c.category = 'deposit' or c.category = 'withdraw' or c.category = 'dividend' or c.category = 'interest') and c.user = 'jun'"
+    };
+
+    try {
+        const {resources: items} = await container
+            .items
+            .query(querySpec)
+            .fetchAll();
+        return items;
+    } catch (err) {
+        console.log(err);
+    }
+}
+
 
 async function update(container, createdItem) {
     const {id, category} = createdItem;

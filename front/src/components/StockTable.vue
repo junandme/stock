@@ -1,5 +1,6 @@
 <template>
     <div>
+        총 투자금: {{ myAccount }}
         <b-container fluid="fluid">
             <!-- User Interface controls -->
             <b-row>
@@ -44,42 +45,12 @@
                         </b-form-checkbox-group>
                     </b-form-group>
                 </b-col>
-
-                <b-col sm="5" md="6" class="my-1">
-                    <b-form-group
-                        label="Per page"
-                        label-for="per-page-select"
-                        label-cols-sm="6"
-                        label-cols-md="4"
-                        label-cols-lg="3"
-                        label-align-sm="right"
-                        label-size="sm"
-                        class="mb-0">
-                        <b-form-select
-                            id="per-page-select"
-                            v-model="perPage"
-                            :options="pageOptions"
-                            size="sm"></b-form-select>
-                    </b-form-group>
-                </b-col>
-
-                <b-col sm="7" md="6" class="my-1">
-                    <b-pagination
-                        v-model="currentPage"
-                        :total-rows="totalRows"
-                        :per-page="perPage"
-                        align="fill"
-                        size="sm"
-                        class="my-0"></b-pagination>
-                </b-col>
             </b-row>
 
             <!-- Main table element -->
             <b-table
                 :items="stocks"
                 :fields="fields"
-                :current-page="currentPage"
-                :per-page="perPage"
                 :filter="filter"
                 :filter-included-fields="filterOn"
                 :sort-by.sync="sortBy"
@@ -87,8 +58,7 @@
                 :sort-direction="sortDirection"
                 stacked="md"
                 show-empty="show-empty"
-                small="small"
-                @filtered="onFiltered">
+                small="small">
 
                 <template #cell(amountprice)="data">
                     {{ data.item.amount * data.item.price }} 
@@ -111,18 +81,51 @@
                 .$http
                 .get('/api')
                 .then((response) => {
-                    this.stocks = response.data
+                    // this.stocks = response.data[0]
+                    // console.log(response.data[0]);
+                    response.data[0].forEach(item => {
+                        var existingStock = this.stocks.filter(function(element) {
+                            return element.ticker === item.ticker;
+                        })
+                        if(existingStock != "") {
+                            var index = this.stocks.findIndex(function(tem, i) {
+                                return tem.ticker === item.ticker
+                            });
+                            var beforePrice = parseInt(this.stocks[index].price);
+                            var beforeAmount = parseInt(this.stocks[index].amount);
+                            var nowPrice = parseInt(item.price);
+                            var nowAmount = parseInt(item.amount);
+                            if(item.category === "buy") {
+                                this.stocks[index].amount = beforeAmount + nowAmount;
+                                this.stocks[index].price = ( (beforePrice*beforeAmount) + (nowPrice*nowAmount) ) / this.stocks[index].amount;
+                            } else if(item.category === "sell") {
+                                this.stocks[index].amount = beforeAmount - nowAmount;
+                                this.stocks[index].price = ( (beforePrice*beforeAmount) - (nowPrice*nowAmount) ) / this.stocks[index].amount;
+                            } else {
+                                
+                            }
+                        } else {
+                            this.stocks.push(item)
+                        }
+                    });
+
+                    response.data[1].forEach(item => {
+                        if(item.category === "deposit" || item.category === "interest" || item.category === "dividend") {
+                            this.myAccount = parseInt(this.myAccount) + parseInt(item.price);
+                        } else if(item.category === "withdraw") {
+                            this.myAccount = parseInt(this.myAccount) - parseInt(item.price);
+                        } else {
+
+                        }
+                    });
                 })
         },
         data() {
             return {
+                myAccount : 0,
                 stocks : [],
                 fields: [
                     {
-                        key: 'category',
-                        label: '행동',
-                        sortable: true
-                    }, {
                         key: 'ticker',
                         label: '종목명',
                         sortable: true
@@ -174,10 +177,6 @@
                         label: '비고'
                     }
                 ],
-                totalRows : 1,
-                currentPage: 1,
-                perPage: 10,
-                pageOptions: [ 5, 10, 20, { value: 100, text: "더 보기" }],
                 sortBy: '',
                 sortDesc: false,
                 sortDirection: 'asc',
@@ -190,15 +189,6 @@
                         .map(f => {
                             return {text: f.label, value: f.key}
                         })
-                    }
-                },
-                mounted() {
-                    this.totalRows = this.items.length;
-                },
-                methods: {
-                    onFiltered(filteredItems) {
-                        this.totalRows = filteredItems.length
-                        this.currentPage = 1;
                     }
                 }
             }
