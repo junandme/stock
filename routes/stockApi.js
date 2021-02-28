@@ -14,19 +14,31 @@ const newItem = {
 };
 
 router.get('/', async function (req, res, next) {
-    const { endpoint, key, databaseId, containerId } = config;
-
-    const client = new CosmosClient({ endpoint, key });
-  
-    const database = client.database(databaseId);
-    const container = database.container(containerId); 
+    const container = getContainer();
   
     stockApi = await select(container);
   
     console.log(stockApi);
 
-    res.send(stockApi)
+    res.send(stockApi);
 });
+
+router.get('/order', function(req, res, next){
+    const container = getContainer();
+
+    console.log(req.query.name);
+
+}) 
+
+function getContainer(){
+    const { endpoint, key, databaseId, containerId } = config;
+
+    const client = new CosmosClient({ endpoint, key });
+  
+    const database = client.database(databaseId);
+
+    return database.container(containerId);
+}
 
 
 async function select(container) {
@@ -46,7 +58,7 @@ async function select(container) {
     }
 }
 
-async function update(createdItem) {
+async function update(container, createdItem) {
     const {id, category} = createdItem;
 
     createdItem.isComplete = true;
@@ -56,5 +68,8 @@ async function update(createdItem) {
         .replace(createdItem);
 }
 
+async function insert(container, item) {
+    const { resource: createdItem } = await container.items.create(item);
+}
 
 module.exports = router;

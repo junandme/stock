@@ -8,7 +8,7 @@
         created() {
             this
                 .$http
-                .get('/api/stockApi')
+                .get('/api')
                 .then((response) => {
                     this.stockApi = response.data
                 })
