@@ -1,6 +1,8 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
+    <div v-for="item in stockApi" v-bind:key="item.id">
+      <h1>{{ item.id }}</h1>
+    </div>
     <h2>Essential Links</h2>
     <ul>
       <li>
@@ -86,9 +88,15 @@
 <script>
 export default {
   name: 'HelloWorld',
+  created () {
+    this.$http.get('/api/stockApi')
+      .then((response) => {
+        this.stockApi = response.data
+      })
+  },
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      stockApi: []
     }
   }
 }
