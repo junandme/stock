@@ -51,9 +51,9 @@
       </b-row>
     </b-container>
 
-    <b-modal ref="sendCheck" hide-footer title="경고">
+    <b-modal ref="sendCheck" hide-footer title="내역을 확인 해주세요.">
       <div class="d-block text-center">
-        <h3>{{ categoryText }} 하시겠습니까?</h3>
+        <h3>{{ categoryText }}</h3>
         <p v-if="category === 'buy' || category ==='sell' || category === 'dividend'">{{ ticker }}</p>
         <p v-if="category === 'buy' || category ==='sell'">수량 {{ amount }}</p>
         <p >금액 {{ price }}</p>
