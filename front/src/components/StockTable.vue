@@ -4,44 +4,19 @@
         <b-container fluid="fluid">
             <!-- User Interface controls -->
             <b-row>
-                <b-col lg="6" class="my-1">
-                    <b-form-group
-                        label="Filter"
-                        label-for="filter-input"
-                        label-cols-sm="3"
-                        label-align-sm="right"
-                        label-size="sm"
-                        class="mb-0">
+                <b-col lg="12" class="my-1">
+                    <b-form-group>
                         <b-input-group size="sm">
                             <b-form-input
                                 id="filter-input"
                                 v-model="filter"
                                 type="search"
-                                placeholder="Type to Search"></b-form-input>
+                                placeholder="검색어를 입력하세요"></b-form-input>
 
                             <b-input-group-append>
-                                <b-button :disabled="!filter" @click="filter = ''">Clear</b-button>
+                                <b-button :disabled="!filter" @click="filter = ''">지우기</b-button>
                             </b-input-group-append>
                         </b-input-group>
-                    </b-form-group>
-                </b-col>
-
-                <b-col lg="6" class="my-1">
-                    <b-form-group
-                        v-model="sortDirection"
-                        label="Filter On"
-                        label-cols-sm="3"
-                        label-align-sm="right"
-                        label-size="sm"
-                        class="mb-0"
-                        v-slot="{ ariaDescribedby }">
-                        <b-form-checkbox-group
-                            v-model="filterOn"
-                            :aria-describedby="ariaDescribedby"
-                            class="mt-1">
-                            <b-form-checkbox value="category" >category</b-form-checkbox>
-                            <b-form-checkbox value="ticker">ticker</b-form-checkbox>
-                        </b-form-checkbox-group>
                     </b-form-group>
                 </b-col>
             </b-row>
