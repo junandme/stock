@@ -4,19 +4,44 @@
         <b-container fluid="fluid">
             <!-- User Interface controls -->
             <b-row>
-                <b-col lg="12" class="my-1">
-                    <b-form-group>
+                <b-col lg="6" class="my-1">
+                    <b-form-group
+                        label="Filter"
+                        label-for="filter-input"
+                        label-cols-sm="3"
+                        label-align-sm="right"
+                        label-size="sm"
+                        class="mb-0">
                         <b-input-group size="sm">
                             <b-form-input
                                 id="filter-input"
                                 v-model="filter"
                                 type="search"
-                                placeholder="검색어를 입력하세요"></b-form-input>
+                                placeholder="Type to Search"></b-form-input>
 
                             <b-input-group-append>
-                                <b-button :disabled="!filter" @click="filter = ''">지우기</b-button>
+                                <b-button :disabled="!filter" @click="filter = ''">Clear</b-button>
                             </b-input-group-append>
                         </b-input-group>
+                    </b-form-group>
+                </b-col>
+
+                <b-col lg="6" class="my-1">
+                    <b-form-group
+                        v-model="sortDirection"
+                        label="Filter On"
+                        label-cols-sm="3"
+                        label-align-sm="right"
+                        label-size="sm"
+                        class="mb-0"
+                        v-slot="{ ariaDescribedby }">
+                        <b-form-checkbox-group
+                            v-model="filterOn"
+                            :aria-describedby="ariaDescribedby"
+                            class="mt-1">
+                            <b-form-checkbox value="category" >category</b-form-checkbox>
+                            <b-form-checkbox value="ticker">ticker</b-form-checkbox>
+                        </b-form-checkbox-group>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -70,33 +95,33 @@
                 .$http
                 .get('/api?name='+this.name)
                 .then((response) => {
-                    response.data[0].reduce((previous, current) =>{
-                        return previous.then(async () => {
+                    (async () => {
+                        for(let item of response.data[0]){
                             var existingStock = this.stocks.filter(function(element) {
-                                return element.ticker === current.ticker;
+                                return element.ticker === item.ticker;
                             })
                             if(existingStock != "") {
                                 var index = this.stocks.findIndex(function(tem, i) {
-                                    return tem.ticker === current.ticker
+                                    return tem.ticker === item.ticker
                                 });
                                 var beforePrice = parseInt(this.stocks[index].price);
                                 var beforeAmount = parseInt(this.stocks[index].amount);
-                                var nowPrice = parseInt(current.price);
-                                var nowAmount = parseInt(current.amount);
-                                if(current.category === "buy") {
+                                var nowPrice = parseInt(item.price);
+                                var nowAmount = parseInt(item.amount);
+                                if(item.category === "buy") {
                                     this.stocks[index].amount = beforeAmount + nowAmount;
                                     this.stocks[index].price = ( (beforePrice*beforeAmount) + (nowPrice*nowAmount) ) / this.stocks[index].amount;
-                                } else if(current.category === "sell") {
+                                } else if(item.category === "sell") {
                                     this.stocks[index].amount = beforeAmount - nowAmount;
                                     this.stocks[index].price = ( (beforePrice*beforeAmount) - (nowPrice*nowAmount) ) / this.stocks[index].amount;
                                 } else { }
                             } else {
-                                const response = await this.$http.get('https://cloud.iexapis.com/stable/stock/'+current.ticker+'/quote?token=pk_6ee50fde81c24341bdca5f071708c226')
-                                current.nowPrice = response.data.latestPrice;
-                                this.stocks.push(current)
+                                const response = await this.$http.get('https://cloud.iexapis.com/stable/stock/'+item.ticker+'/quote?token=pk_6ee50fde81c24341bdca5f071708c226')
+                                item.nowPrice = response.data.latestPrice;
+                                this.stocks.push(item)
                             }
-                        })
-                    }, Promise.resolve());
+                        }
+                    })();
 
                     response.data[1].forEach(item => {
                         if(item.category === "deposit" || item.category === "interest" || item.category === "dividend") {
