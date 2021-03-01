@@ -24,6 +24,7 @@
             size="lg"
             name="radios-btn-outline"
             buttons
+            @change="setCategoryText"
           ></b-form-radio-group>
         </b-form-group>
       </b-row>
@@ -52,7 +53,11 @@
 
     <b-modal ref="sendCheck" hide-footer title="경고">
       <div class="d-block text-center">
-        <h3>적용 하시겠습니까?</h3>
+        <h3>{{ categoryText }} 하시겠습니까?</h3>
+        <p v-if="category === 'buy' || category ==='sell' || category === 'dividend'">{{ ticker }}</p>
+        <p v-if="category === 'buy' || category ==='sell'">수량 {{ amount }}</p>
+        <p >금액 {{ price }}</p>
+        <p v-if="category === 'buy' || category ==='sell'">총 금액 {{ amount * price }}</p>
       </div>
       <b-row>
         <b-col><b-button class="mt-3" variant="outline-danger" block @click="send">확인</b-button></b-col>
@@ -68,6 +73,7 @@ export default {
     data() {
       return {
         category: 'buy',
+        categoryText: "매수",
         options: [
           { text: '매수', value: 'buy' },
           { text: '매도', value: 'sell' },
@@ -83,6 +89,13 @@ export default {
       }
     },
     methods: {      
+      setCategoryText(){
+        for(let option of this.options){
+          if(option.value == this.category){
+            this.categoryText = option.text;
+          }
+        }
+      },
       showData(){
         // window.location = window.location.origin+"/#?name="+this.name;
         window.location = '/?name='+this.name;

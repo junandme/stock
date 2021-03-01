@@ -66,7 +66,8 @@
 <script>
     export default {
         async created() {
-            this.calcStockData(await this.$http.get('/api?name='+this.name));
+            const response = await this.$http.get('/api?name='+this.name);
+            this.calcStockData(response);
 
             response.data[1].forEach(item => {
                 if(item.category === "deposit" || item.category === "interest" || item.category === "dividend") {
