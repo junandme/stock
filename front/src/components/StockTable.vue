@@ -91,46 +91,44 @@
 <script>
     export default {
         async created() {
-            this
-                .$http
-                .get('/api?name='+this.name)
-                .then((response) => {
-                    (async () => {
-                        for(let item of response.data[0]){
-                            var existingStock = this.stocks.filter(function(element) {
-                                return element.ticker === item.ticker;
-                            })
-                            if(existingStock != "") {
-                                var index = this.stocks.findIndex(function(tem, i) {
-                                    return tem.ticker === item.ticker
-                                });
-                                var beforePrice = parseInt(this.stocks[index].price);
-                                var beforeAmount = parseInt(this.stocks[index].amount);
-                                var nowPrice = parseInt(item.price);
-                                var nowAmount = parseInt(item.amount);
-                                if(item.category === "buy") {
-                                    this.stocks[index].amount = beforeAmount + nowAmount;
-                                    this.stocks[index].price = ( (beforePrice*beforeAmount) + (nowPrice*nowAmount) ) / this.stocks[index].amount;
-                                } else if(item.category === "sell") {
-                                    this.stocks[index].amount = beforeAmount - nowAmount;
-                                    this.stocks[index].price = ( (beforePrice*beforeAmount) - (nowPrice*nowAmount) ) / this.stocks[index].amount;
-                                } else { }
-                            } else {
-                                const response = await this.$http.get('https://cloud.iexapis.com/stable/stock/'+item.ticker+'/quote?token=pk_6ee50fde81c24341bdca5f071708c226')
-                                item.nowPrice = response.data.latestPrice;
-                                this.stocks.push(item)
-                            }
-                        }
-                    })();
+            this.calcStockData(await this.$http.get('/api?name='+this.name));
 
-                    response.data[1].forEach(item => {
-                        if(item.category === "deposit" || item.category === "interest" || item.category === "dividend") {
-                            this.myAccount = parseInt(this.myAccount) + parseInt(item.price);
-                        } else if(item.category === "withdraw") {
-                            this.myAccount = parseInt(this.myAccount) - parseInt(item.price);
+            response.data[1].forEach(item => {
+                if(item.category === "deposit" || item.category === "interest" || item.category === "dividend") {
+                    this.myAccount = parseInt(this.myAccount) + parseInt(item.price);
+                } else if(item.category === "withdraw") {
+                    this.myAccount = parseInt(this.myAccount) - parseInt(item.price);
+                } else { }
+            });
+        },
+        methods: {
+            async calcStockData(response){
+                for(let item of response.data[0]){
+                    var existingStock = this.stocks.filter(function(element) {
+                        return element.ticker === item.ticker;
+                    })
+                    if(existingStock != "") {
+                        var index = this.stocks.findIndex(function(tem, i) {
+                            return tem.ticker === item.ticker
+                        });
+                        var beforePrice = parseInt(this.stocks[index].price);
+                        var beforeAmount = parseInt(this.stocks[index].amount);
+                        var nowPrice = parseInt(item.price);
+                        var nowAmount = parseInt(item.amount);
+                        if(item.category === "buy") {
+                            this.stocks[index].amount = beforeAmount + nowAmount;
+                            this.stocks[index].price = ( (beforePrice*beforeAmount) + (nowPrice*nowAmount) ) / this.stocks[index].amount;
+                        } else if(item.category === "sell") {
+                            this.stocks[index].amount = beforeAmount - nowAmount;
+                            this.stocks[index].price = ( (beforePrice*beforeAmount) - (nowPrice*nowAmount) ) / this.stocks[index].amount;
                         } else { }
-                    });
-                })
+                    } else {
+                        const iexResponse = await this.$http.get('https://cloud.iexapis.com/stable/stock/'+item.ticker+'/quote?token=pk_6ee50fde81c24341bdca5f071708c226')
+                        item.nowPrice = iexResponse.data.latestPrice;
+                        this.stocks.push(item)
+                    }
+                }
+            }
         },
         data() {
             return {
