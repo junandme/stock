@@ -39,7 +39,7 @@
                             v-model="filterOn"
                             :aria-describedby="ariaDescribedby"
                             class="mt-1">
-                            <b-form-checkbox value="category">category</b-form-checkbox>
+                            <b-form-checkbox value="category" >category</b-form-checkbox>
                             <b-form-checkbox value="ticker">ticker</b-form-checkbox>
                         </b-form-checkbox-group>
                     </b-form-group>
@@ -89,41 +89,39 @@
 </template>
 
 <script>
-    import axios from 'axios'
-
     export default {
-        created() {
+        async created() {
             this
                 .$http
                 .get('/api?name='+this.name)
                 .then((response) => {
-                    response.data[0].forEach(item => {
-                        var existingStock = this.stocks.filter(function(element) {
-                            return element.ticker === item.ticker;
+                    response.data[0].reduce((previous, current) =>{
+                        return previous.then(async () => {
+                            var existingStock = this.stocks.filter(function(element) {
+                                return element.ticker === current.ticker;
+                            })
+                            if(existingStock != "") {
+                                var index = this.stocks.findIndex(function(tem, i) {
+                                    return tem.ticker === current.ticker
+                                });
+                                var beforePrice = parseInt(this.stocks[index].price);
+                                var beforeAmount = parseInt(this.stocks[index].amount);
+                                var nowPrice = parseInt(current.price);
+                                var nowAmount = parseInt(current.amount);
+                                if(current.category === "buy") {
+                                    this.stocks[index].amount = beforeAmount + nowAmount;
+                                    this.stocks[index].price = ( (beforePrice*beforeAmount) + (nowPrice*nowAmount) ) / this.stocks[index].amount;
+                                } else if(current.category === "sell") {
+                                    this.stocks[index].amount = beforeAmount - nowAmount;
+                                    this.stocks[index].price = ( (beforePrice*beforeAmount) - (nowPrice*nowAmount) ) / this.stocks[index].amount;
+                                } else { }
+                            } else {
+                                const response = await this.$http.get('https://cloud.iexapis.com/stable/stock/'+current.ticker+'/quote?token=pk_6ee50fde81c24341bdca5f071708c226')
+                                current.nowPrice = response.data.latestPrice;
+                                this.stocks.push(current)
+                            }
                         })
-                        if(existingStock != "") {
-                            var index = this.stocks.findIndex(function(tem, i) {
-                                return tem.ticker === item.ticker
-                            });
-                            var beforePrice = parseInt(this.stocks[index].price);
-                            var beforeAmount = parseInt(this.stocks[index].amount);
-                            var nowPrice = parseInt(item.price);
-                            var nowAmount = parseInt(item.amount);
-                            if(item.category === "buy") {
-                                this.stocks[index].amount = beforeAmount + nowAmount;
-                                this.stocks[index].price = ( (beforePrice*beforeAmount) + (nowPrice*nowAmount) ) / this.stocks[index].amount;
-                            } else if(item.category === "sell") {
-                                this.stocks[index].amount = beforeAmount - nowAmount;
-                                this.stocks[index].price = ( (beforePrice*beforeAmount) - (nowPrice*nowAmount) ) / this.stocks[index].amount;
-                            } else { }
-                        } else {
-                            axios.get('https://cloud.iexapis.com/stable/stock/'+item.ticker+'/quote?token=pk_6ee50fde81c24341bdca5f071708c226')
-                                .then(response => {
-                                    item.nowPrice = response.data.latestPrice
-                                })
-                            this.stocks.push(item)
-                        }
-                    });
+                    }, Promise.resolve());
 
                     response.data[1].forEach(item => {
                         if(item.category === "deposit" || item.category === "interest" || item.category === "dividend") {
